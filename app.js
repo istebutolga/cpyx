@@ -276,35 +276,57 @@ window.addEventListener('DOMContentLoaded', () => {
     // Konuşma öğeleri için CSS stillerini ekle
     const style = document.createElement('style');
     style.textContent = `
+        /* Genel Mobil Uyumluluk */
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        body {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .container {
+            height: 100%;
+            max-height: 100%;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: row;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        
         /* Mobil Uyumluluk */
         @media (max-width: 768px) {
-            body {
-                overflow: hidden;
-                position: fixed;
-                width: 100%;
-                height: 100%;
-            }
-            
-            .container {
-                height: 100vh;
-                max-height: 100vh;
-                padding: 0;
-                margin: 0;
-                border-radius: 0;
-                box-shadow: none;
-            }
-            
             .sidebar {
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 80%;
-                max-width: 300px;
+                width: 85%;
+                max-width: 320px;
                 height: 100%;
                 z-index: 1000;
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
             }
             
             .sidebar.active {
@@ -329,14 +351,28 @@ window.addEventListener('DOMContentLoaded', () => {
             .main {
                 width: 100%;
                 padding: 0;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
             }
             
             .header {
                 padding: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 50px;
+                min-height: 50px;
+                border-bottom: 1px solid var(--border-color);
             }
             
             .header-title {
                 font-size: 1.2rem;
+                margin-left: 10px;
+                flex: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             
             .menu-toggle {
@@ -349,47 +385,125 @@ window.addEventListener('DOMContentLoaded', () => {
                 border: none;
                 cursor: pointer;
                 color: var(--text-color);
+                padding: 0;
+                margin: 0;
             }
             
             .chat-container {
-                height: calc(100vh - 120px);
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                height: calc(100% - 110px);
+                overflow: hidden;
             }
             
             .chat-messages {
+                flex: 1;
                 padding: 10px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
             
             .message {
                 padding: 10px;
                 margin-bottom: 10px;
+                border-radius: 8px;
+                max-width: 90%;
+            }
+            
+            .message.user {
+                margin-left: auto;
+                background-color: var(--primary-color);
+                color: white;
+            }
+            
+            .message.assistant {
+                margin-right: auto;
+                background-color: var(--bg-secondary);
+                color: var(--text-color);
             }
             
             .input-container {
                 padding: 10px;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
                 background-color: var(--bg-color);
                 border-top: 1px solid var(--border-color);
+                display: flex;
+                align-items: center;
+                position: relative;
+                min-height: 60px;
+                max-height: 150px;
+                width: 100%;
+                box-sizing: border-box;
             }
             
             .message-input {
-                padding: 10px;
-                max-height: 120px;
+                flex: 1;
+                padding: 12px;
+                border-radius: 20px;
+                border: 1px solid var(--border-color);
+                background-color: var(--bg-secondary);
+                color: var(--text-color);
+                resize: none;
+                max-height: 100px;
+                margin-right: 8px;
+                font-size: 16px;
+            }
+            
+            #sendButton {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: var(--primary-color);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                flex-shrink: 0;
             }
             
             .new-chat-btn {
                 margin: 10px;
+                padding: 10px;
+                border-radius: 8px;
+                width: calc(100% - 20px);
+                text-align: center;
             }
             
             .conversation-list {
-                height: calc(100vh - 150px);
+                height: calc(100% - 70px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .conversation-item {
+                padding: 12px 15px;
+                border-radius: 8px;
+                margin: 5px 10px;
             }
             
             .modal-container {
                 width: 95%;
                 padding: 15px;
+            }
+            
+            /* Dokunmatik cihazlar için iyileştirmeler */
+            button, .conversation-item, .message-input {
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* iPhone X ve üzeri için güvenli alan */
+            @supports (padding: max(0px)) {
+                .input-container {
+                    padding-bottom: max(10px, env(safe-area-inset-bottom));
+                }
+                
+                .sidebar {
+                    padding-top: env(safe-area-inset-top);
+                    height: calc(100% - env(safe-area-inset-bottom));
+                }
             }
         }
         
@@ -413,6 +527,13 @@ window.addEventListener('DOMContentLoaded', () => {
         .conversation-item:hover .delete-conversation {
             display: block;
         }
+        /* Mobil cihazlarda her zaman göster */
+        @media (max-width: 768px) {
+            .conversation-item .rename-conversation,
+            .conversation-item .delete-conversation {
+                display: block;
+            }
+        }
         .conversation-item .rename-conversation:hover,
         .conversation-item .delete-conversation:hover {
             opacity: 1;
@@ -424,6 +545,10 @@ window.addEventListener('DOMContentLoaded', () => {
         .conversation-item .delete-conversation {
             right: 5px;
             color: var(--danger-color, #ff5555);
+        }
+        .conversation-item .rename-conversation:active,
+        .conversation-item .delete-conversation:active {
+            opacity: 1;
         }
         .conversation-title {
             padding-right: 70px;
@@ -677,6 +802,42 @@ window.addEventListener('DOMContentLoaded', () => {
         meta.name = 'viewport';
         meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
         document.head.appendChild(meta);
+    }
+    
+    // Mobil cihazlarda mesaj gönderme alanını düzelt
+    const inputContainer = document.querySelector('.input-container');
+    const messageInput = document.querySelector('.message-input');
+    
+    if (inputContainer && messageInput) {
+        // Mesaj giriş alanını düzelt
+        messageInput.style.fontSize = '16px'; // iOS'ta yakınlaştırmayı önler
+        
+        // Mesaj giriş alanının yüksekliğini otomatik ayarla
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            
+            // Maksimum yüksekliği sınırla
+            if (this.scrollHeight > 100) {
+                this.style.height = '100px';
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.overflowY = 'hidden';
+            }
+        });
+    }
+    
+    // Mobil cihazlarda mesaj alanını en alta kaydır
+    const chatMessages = document.querySelector('.chat-messages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Yeni mesaj eklendiğinde otomatik kaydır
+        const observer = new MutationObserver(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+        
+        observer.observe(chatMessages, { childList: true });
     }
 });
 
