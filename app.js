@@ -237,6 +237,8 @@ Başka nasıl yardımcı olabilirim?`
 
 // Sayfa yüklendiğinde mevcut konuşmayı yükle
 window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM yüklendi, uygulama başlatılıyor...');
+    
     // Yükleme ekranını oluştur
     const loaderHTML = `
         <div id="loaderContainer" class="loader-container">
@@ -255,13 +257,12 @@ window.addEventListener('DOMContentLoaded', () => {
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--bg-color, #1a1a1a);
+            background-color: #1a1a1a;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.5s ease;
         }
         
         .loader-spinner {
@@ -275,13 +276,22 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         
         .loader-text {
-            color: var(--text-color, #ffffff);
+            color: #ffffff;
             font-size: 18px;
             font-weight: 500;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        .main {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .main.loaded {
+            opacity: 1;
         }
     `;
     document.head.appendChild(loaderStyle);
@@ -319,6 +329,17 @@ window.addEventListener('DOMContentLoaded', () => {
     const style = document.createElement('style');
     style.textContent = `
         /* Ana Container Stilleri */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
         .main {
             display: flex;
             flex-direction: column;
@@ -327,9 +348,7 @@ window.addEventListener('DOMContentLoaded', () => {
             position: fixed;
             top: 0;
             left: 0;
-            background-color: var(--bg-color);
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            background-color: #1a1a1a;
         }
 
         /* Header Stilleri */
@@ -337,8 +356,8 @@ window.addEventListener('DOMContentLoaded', () => {
             display: flex;
             align-items: center;
             padding: 10px 15px;
-            background-color: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
             height: 56px;
             position: sticky;
             top: 0;
@@ -349,7 +368,7 @@ window.addEventListener('DOMContentLoaded', () => {
             font-size: 1.2rem;
             font-weight: 500;
             margin-left: 15px;
-            color: var(--text-color);
+            color: #ffffff;
         }
 
         .menu-toggle {
@@ -361,13 +380,13 @@ window.addEventListener('DOMContentLoaded', () => {
             background: transparent;
             border: none;
             cursor: pointer;
-            color: var(--text-color);
+            color: #ffffff;
             border-radius: 50%;
             padding: 8px;
         }
 
         .menu-toggle:active {
-            background-color: var(--bg-secondary);
+            background-color: #333;
         }
 
         /* Chat Container Stilleri */
@@ -375,7 +394,7 @@ window.addEventListener('DOMContentLoaded', () => {
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
-            background-color: var(--bg-color);
+            background-color: #1a1a1a;
             position: relative;
             padding-bottom: 80px;
         }
@@ -409,8 +428,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
         .message.assistant {
             align-self: flex-start;
-            background-color: var(--bg-secondary);
-            color: var(--text-color);
+            background-color: #333;
+            color: #ffffff;
             border-bottom-left-radius: 4px;
             margin-right: 15%;
         }
@@ -431,8 +450,8 @@ window.addEventListener('DOMContentLoaded', () => {
             left: 0;
             right: 0;
             padding: 12px 15px;
-            background-color: var(--bg-color);
-            border-top: 1px solid var(--border-color);
+            background-color: #1a1a1a;
+            border-top: 1px solid #333;
             display: flex;
             align-items: flex-end;
             gap: 10px;
@@ -443,9 +462,9 @@ window.addEventListener('DOMContentLoaded', () => {
             flex: 1;
             padding: 12px 15px;
             border-radius: 20px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-secondary);
-            color: var(--text-color);
+            border: 1px solid #333;
+            background-color: #333;
+            color: #ffffff;
             font-size: 15px;
             line-height: 1.4;
             resize: none;
@@ -493,6 +512,80 @@ window.addEventListener('DOMContentLoaded', () => {
             .chat-container {
                 padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
             }
+        }
+        
+        /* Düşünme Animasyonu */
+        .thinking-message {
+            align-self: flex-start;
+            background-color: #333;
+            border-radius: 18px;
+            padding: 12px 15px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            max-width: 100px;
+        }
+
+        .thinking-dots {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .thinking-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.6); }
+            40% { transform: scale(1); }
+        }
+        
+        /* Gönder Butonu Animasyonu */
+        #sendButton .send-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        
+        #sendButton.loading .send-icon {
+            transform: scale(0);
+            opacity: 0;
+        }
+        
+        #sendButton .loading-icon {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        #sendButton.loading .loading-icon {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .stop-icon {
+            width: 14px;
+            height: 14px;
+            background-color: white;
+            border-radius: 2px;
         }
     `;
     document.head.appendChild(style);
@@ -553,26 +646,45 @@ window.addEventListener('DOMContentLoaded', () => {
                 <div class="stop-icon"></div>
             </span>
         `;
+        
+        // Gönder butonuna tıklama olayı ekle
+        sendButton.addEventListener('click', function() {
+            sendMessage();
+        });
+    }
+    
+    // Enter tuşuna basıldığında mesaj gönder
+    if (messageInput) {
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
     }
 
+    console.log('Uygulama yükleniyor...');
+    
     // Yükleme ekranını gizle ve içeriği göster
-    setTimeout(() => {
+    window.onload = function() {
+        console.log('Sayfa tamamen yüklendi, yükleme ekranı kaldırılıyor...');
+        
         const loaderContainer = document.getElementById('loaderContainer');
         const mainContent = document.querySelector('.main');
         
-        if (loaderContainer) {
-            loaderContainer.style.opacity = '0';
-            setTimeout(() => {
-                loaderContainer.style.display = 'none';
-                if (mainContent) {
-                    mainContent.style.opacity = '1';
-                }
-                
-                // Test mesajlarını yükle
-                loadTestMessages();
-            }, 500);
+        if (loaderContainer && mainContent) {
+            // Yükleme ekranını kaldır
+            loaderContainer.style.display = 'none';
+            
+            // Ana içeriği göster
+            mainContent.classList.add('loaded');
+            
+            // Test mesajlarını yükle
+            loadTestMessages();
+            
+            console.log('Uygulama başlatıldı!');
         }
-    }, 1500);
+    };
 });
 
 /**
