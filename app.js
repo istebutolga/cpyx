@@ -401,145 +401,122 @@ window.addEventListener('DOMContentLoaded', () => {
                 background-color: var(--bg-secondary);
             }
             
+            /* Chat Container Düzeltmeleri */
             .chat-container {
-                flex: 1;
+                position: relative;
+                height: calc(100vh - 120px);
+                overflow-y: auto;
+                overflow-x: hidden;
+                -webkit-overflow-scrolling: touch;
+                background-color: var(--bg-color);
+                padding-bottom: 80px;
                 display: flex;
                 flex-direction: column;
-                height: calc(100% - 110px);
-                overflow: hidden;
-                background-color: var(--bg-color);
             }
-            
+
             .chat-messages {
                 flex: 1;
                 padding: 15px;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                background-color: var(--bg-color);
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                min-height: 100%;
             }
-            
-            /* Mesaj Görünümü İyileştirmeleri */
+
+            /* Mesaj Görünümü Düzeltmeleri */
             .message {
-                padding: 12px 15px;
-                margin: 8px 0;
-                border-radius: 18px;
+                display: flex;
+                flex-direction: column;
                 max-width: 85%;
-                line-height: 1.4;
-                position: relative;
-                font-size: 15px;
+                margin: 8px 0;
                 clear: both;
-                word-wrap: break-word;
-                white-space: pre-wrap;
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
             }
 
             .message.user {
-                float: right;
+                align-self: flex-end;
                 background-color: #4285f4;
                 color: white;
-                border-bottom-right-radius: 4px;
+                border-radius: 18px 18px 4px 18px;
+                padding: 12px 15px;
                 margin-left: 15%;
             }
 
             .message.assistant {
-                float: left;
+                align-self: flex-start;
                 background-color: var(--bg-secondary, #2a2a2a);
                 color: var(--text-color);
-                border-bottom-left-radius: 4px;
+                border-radius: 18px 18px 18px 4px;
+                padding: 12px 15px;
                 margin-right: 15%;
             }
 
             .message-header {
                 display: flex;
                 align-items: center;
-                margin-bottom: 5px;
+                gap: 8px;
+                margin-bottom: 4px;
                 font-size: 13px;
-                opacity: 0.8;
             }
 
             .message-header .name {
                 font-weight: 500;
-                margin-right: 8px;
             }
 
             .message-header .time {
-                font-size: 12px;
+                opacity: 0.7;
             }
 
             .message-content {
+                font-size: 15px;
                 line-height: 1.5;
+                word-wrap: break-word;
+                white-space: pre-wrap;
             }
 
-            /* Düşünme Animasyonu İyileştirmesi */
+            /* Düşünme Animasyonu */
             .thinking-message {
+                align-self: flex-start;
+                background-color: var(--bg-secondary, #2a2a2a);
+                border-radius: 18px;
+                padding: 12px 15px;
+                margin: 8px 0;
                 display: flex;
                 align-items: center;
-                padding: 8px 12px;
-                background-color: var(--bg-secondary, #2a2a2a);
-                border-radius: 12px;
-                margin: 8px 0;
                 max-width: 100px;
-                float: left;
-                clear: both;
             }
 
             .thinking-dots {
                 display: flex;
                 align-items: center;
-                justify-content: center;
                 gap: 4px;
             }
 
             .thinking-dots span {
-                width: 6px;
-                height: 6px;
+                width: 8px;
+                height: 8px;
                 background-color: var(--text-color);
                 border-radius: 50%;
                 opacity: 0.6;
-                animation: thinking 1.4s infinite ease-in-out both;
+                animation: bounce 1.4s infinite ease-in-out both;
             }
 
             .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
             .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
 
-            @keyframes thinking {
-                0%, 80%, 100% { transform: scale(0.4); }
+            @keyframes bounce {
+                0%, 80%, 100% { transform: scale(0.6); }
                 40% { transform: scale(1); }
             }
 
-            /* Mesaj Alanı Temizleme */
-            .chat-messages::after {
-                content: '';
-                display: table;
-                clear: both;
-            }
-
-            /* Kod Bloğu İyileştirmeleri */
-            .message pre {
-                background-color: rgba(0, 0, 0, 0.2);
-                border-radius: 8px;
-                padding: 12px;
-                margin: 8px 0;
-                overflow-x: auto;
-                font-family: 'Courier New', monospace;
-                font-size: 14px;
-                line-height: 1.5;
-            }
-
-            .message pre code {
-                background: none;
-                padding: 0;
-                border-radius: 0;
-            }
-
-            .message code {
-                font-family: 'Courier New', monospace;
-                background-color: rgba(0, 0, 0, 0.2);
-                padding: 2px 4px;
-                border-radius: 4px;
-                font-size: 0.9em;
-            }
-
-            /* Giriş Alanı İyileştirmeleri */
+            /* Giriş Alanı Düzeltmeleri */
             .input-container {
                 position: fixed;
                 bottom: 0;
@@ -551,8 +528,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 display: flex;
                 align-items: flex-end;
                 gap: 10px;
-                max-height: 150px;
-                transition: all 0.3s ease;
+                z-index: 100;
             }
 
             .message-input {
@@ -567,13 +543,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 font-size: 15px;
                 line-height: 1.4;
                 resize: none;
-                transition: all 0.2s ease;
-            }
-
-            .message-input:focus {
-                outline: none;
-                border-color: #4285f4;
-                box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
             }
 
             #sendButton {
@@ -581,36 +550,14 @@ window.addEventListener('DOMContentLoaded', () => {
                 height: 44px;
                 border-radius: 50%;
                 background-color: #4285f4;
-                border: none;
                 color: white;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                border: none;
                 cursor: pointer;
-                transition: all 0.2s ease;
-                flex-shrink: 0;
                 padding: 0;
-                margin: 0;
-            }
-
-            #sendButton:active {
-                transform: scale(0.95);
-            }
-
-            /* Chat Container İyileştirmesi */
-            .chat-container {
-                height: calc(100vh - 120px);
-                padding-bottom: 70px;
-                overflow-y: auto;
-                overflow-x: hidden;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .chat-messages {
-                padding: 15px;
-                max-width: 100%;
-                margin: 0 auto;
-                box-sizing: border-box;
+                flex-shrink: 0;
             }
 
             /* iPhone X ve Üzeri için Güvenli Alan */
@@ -620,7 +567,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 .chat-container {
-                    padding-bottom: max(70px, calc(70px + env(safe-area-inset-bottom)));
+                    padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
                 }
             }
         }
@@ -1363,12 +1310,23 @@ function appendMessage(role, content, isThinking = false) {
                 <span class="name">${role === 'user' ? 'Sen' : 'CepyX'}</span>
                 <span class="time">${timestamp}</span>
             </div>
-            <div class="message-content">${content}</div>
+            <div class="message-content">${preprocessMarkdown(content)}</div>
         `;
+
+        // Markdown elementlerini işle
+        processMarkdownElements(messageDiv);
     }
     
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Mesajı ekle
+    const chatMessages = document.querySelector('.chat-messages');
+    if (chatMessages) {
+        chatMessages.appendChild(messageDiv);
+        
+        // Otomatik kaydırma
+        setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 100);
+    }
     
     return messageDiv.id;
 }
