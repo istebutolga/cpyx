@@ -239,63 +239,6 @@ Başka nasıl yardımcı olabilirim?`
 window.addEventListener('DOMContentLoaded', () => {
     console.log('DOM yüklendi, uygulama başlatılıyor...');
     
-    // Yükleme ekranını oluştur
-    const loaderHTML = `
-        <div id="loaderContainer" class="loader-container">
-            <div class="loader-spinner"></div>
-            <div class="loader-text">AI Hub yükleniyor...</div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('afterbegin', loaderHTML);
-    
-    // Yükleme ekranı stilleri
-    const loaderStyle = document.createElement('style');
-    loaderStyle.textContent = `
-        .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        
-        .loader-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top-color: #4285f4;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        .loader-text {
-            color: #ffffff;
-            font-size: 18px;
-            font-weight: 500;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .main {
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        
-        .main.loaded {
-            opacity: 1;
-        }
-    `;
-    document.head.appendChild(loaderStyle);
-
     // Ana container'ı oluştur
     const mainContainer = document.querySelector('.main');
     if (mainContainer) {
@@ -323,6 +266,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 </button>
             </div>
         `;
+        
+        // Ana içeriği hemen göster
+        mainContainer.style.display = 'flex';
+        mainContainer.style.opacity = '1';
     }
 
     // CSS stillerini ekle
@@ -587,6 +534,41 @@ window.addEventListener('DOMContentLoaded', () => {
             background-color: white;
             border-radius: 2px;
         }
+        
+        /* Sidebar Stilleri */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 85%;
+            max-width: 320px;
+            height: 100%;
+            background-color: #1a1a1a;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar.active {
+            left: 0;
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+        }
     `;
     document.head.appendChild(style);
 
@@ -604,6 +586,14 @@ window.addEventListener('DOMContentLoaded', () => {
                 this.style.overflowY = 'hidden';
             }
         });
+        
+        // Enter tuşuna basıldığında mesaj gönder
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
     }
 
     // Menü butonuna tıklama olayı ekle
@@ -613,13 +603,41 @@ window.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             e.stopPropagation();
             
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.querySelector('.sidebar-overlay');
+            // Sidebar ve overlay oluştur (eğer yoksa)
+            let sidebar = document.querySelector('.sidebar');
+            let overlay = document.querySelector('.sidebar-overlay');
             
-            if (sidebar && overlay) {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
+            if (!sidebar) {
+                sidebar = document.createElement('div');
+                sidebar.className = 'sidebar';
+                sidebar.innerHTML = `
+                    <div class="sidebar-header">
+                        <h2>Konuşmalar</h2>
+                    </div>
+                    <div class="conversation-list"></div>
+                    <button class="new-chat-btn">Yeni Konuşma</button>
+                `;
+                document.body.appendChild(sidebar);
             }
+            
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'sidebar-overlay';
+                document.body.appendChild(overlay);
+                
+                // Overlay tıklama olayı
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+            
+            // Sidebar ve overlay'i göster/gizle
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Konuşma listesini güncelle
+            updateConversationsList();
         });
     }
 
@@ -652,39 +670,14 @@ window.addEventListener('DOMContentLoaded', () => {
             sendMessage();
         });
     }
-    
-    // Enter tuşuna basıldığında mesaj gönder
-    if (messageInput) {
-        messageInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-    }
 
     console.log('Uygulama yükleniyor...');
     
-    // Yükleme ekranını gizle ve içeriği göster
-    window.onload = function() {
-        console.log('Sayfa tamamen yüklendi, yükleme ekranı kaldırılıyor...');
-        
-        const loaderContainer = document.getElementById('loaderContainer');
-        const mainContent = document.querySelector('.main');
-        
-        if (loaderContainer && mainContent) {
-            // Yükleme ekranını kaldır
-            loaderContainer.style.display = 'none';
-            
-            // Ana içeriği göster
-            mainContent.classList.add('loaded');
-            
-            // Test mesajlarını yükle
-            loadTestMessages();
-            
-            console.log('Uygulama başlatıldı!');
-        }
-    };
+    // Test mesajlarını yükle
+    setTimeout(() => {
+        loadTestMessages();
+        console.log('Test mesajları yüklendi!');
+    }, 100);
 });
 
 /**
