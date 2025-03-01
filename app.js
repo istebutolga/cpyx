@@ -276,6 +276,123 @@ window.addEventListener('DOMContentLoaded', () => {
     // Konuşma öğeleri için CSS stillerini ekle
     const style = document.createElement('style');
     style.textContent = `
+        /* Mobil Uyumluluk */
+        @media (max-width: 768px) {
+            body {
+                overflow: hidden;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .container {
+                height: 100vh;
+                max-height: 100vh;
+                padding: 0;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 80%;
+                max-width: 300px;
+                height: 100%;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                display: none;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            .main {
+                width: 100%;
+                padding: 0;
+            }
+            
+            .header {
+                padding: 10px;
+            }
+            
+            .header-title {
+                font-size: 1.2rem;
+            }
+            
+            .menu-toggle {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                color: var(--text-color);
+            }
+            
+            .chat-container {
+                height: calc(100vh - 120px);
+            }
+            
+            .chat-messages {
+                padding: 10px;
+            }
+            
+            .message {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .input-container {
+                padding: 10px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: var(--bg-color);
+                border-top: 1px solid var(--border-color);
+            }
+            
+            .message-input {
+                padding: 10px;
+                max-height: 120px;
+            }
+            
+            .new-chat-btn {
+                margin: 10px;
+            }
+            
+            .conversation-list {
+                height: calc(100vh - 150px);
+            }
+            
+            .modal-container {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+        
         .conversation-item {
             position: relative;
         }
@@ -504,6 +621,44 @@ window.addEventListener('DOMContentLoaded', () => {
         `;
     }
     
+    // Mobil menü butonunu ekle
+    const header = document.querySelector('.header');
+    if (header) {
+        const menuToggle = document.createElement('button');
+        menuToggle.className = 'menu-toggle';
+        menuToggle.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        `;
+        header.prepend(menuToggle);
+        
+        // Sidebar overlay ekle
+        const sidebarOverlay = document.createElement('div');
+        sidebarOverlay.className = 'sidebar-overlay';
+        document.body.appendChild(sidebarOverlay);
+        
+        // Menü toggle olayı
+        menuToggle.addEventListener('click', () => {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            }
+        });
+        
+        // Overlay tıklama olayı
+        sidebarOverlay.addEventListener('click', () => {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            }
+        });
+    }
+    
     // Yükleme ekranını gizle
     setTimeout(() => {
         loaderContainer.style.opacity = '0';
@@ -512,6 +667,17 @@ window.addEventListener('DOMContentLoaded', () => {
             content.style.opacity = '1';
         }, 500);
     }, 1000);
+    
+    // Mobil cihazlarda viewport meta etiketini güncelle
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (viewportMeta) {
+        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    } else {
+        const meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+        document.head.appendChild(meta);
+    }
 });
 
 /**
