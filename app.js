@@ -237,6 +237,55 @@ Başka nasıl yardımcı olabilirim?`
 
 // Sayfa yüklendiğinde mevcut konuşmayı yükle
 window.addEventListener('DOMContentLoaded', () => {
+    // Yükleme ekranını oluştur
+    const loaderHTML = `
+        <div id="loaderContainer" class="loader-container">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">AI Hub yükleniyor...</div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('afterbegin', loaderHTML);
+    
+    // Yükleme ekranı stilleri
+    const loaderStyle = document.createElement('style');
+    loaderStyle.textContent = `
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color, #1a1a1a);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #4285f4;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .loader-text {
+            color: var(--text-color, #ffffff);
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(loaderStyle);
+
     // Ana container'ı oluştur
     const mainContainer = document.querySelector('.main');
     if (mainContainer) {
@@ -279,6 +328,8 @@ window.addEventListener('DOMContentLoaded', () => {
             top: 0;
             left: 0;
             background-color: var(--bg-color);
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
         /* Header Stilleri */
@@ -488,6 +539,40 @@ window.addEventListener('DOMContentLoaded', () => {
         
         observer.observe(chatMessages, { childList: true });
     }
+
+    // Gönder butonunu güncelle
+    const sendButton = document.querySelector('#sendButton');
+    if (sendButton) {
+        // Mevcut içeriği kaydet
+        const originalContent = sendButton.innerHTML;
+        
+        // Yeni içerik ekle
+        sendButton.innerHTML = `
+            <span class="send-icon">${originalContent}</span>
+            <span class="loading-icon">
+                <div class="stop-icon"></div>
+            </span>
+        `;
+    }
+
+    // Yükleme ekranını gizle ve içeriği göster
+    setTimeout(() => {
+        const loaderContainer = document.getElementById('loaderContainer');
+        const mainContent = document.querySelector('.main');
+        
+        if (loaderContainer) {
+            loaderContainer.style.opacity = '0';
+            setTimeout(() => {
+                loaderContainer.style.display = 'none';
+                if (mainContent) {
+                    mainContent.style.opacity = '1';
+                }
+                
+                // Test mesajlarını yükle
+                loadTestMessages();
+            }, 500);
+        }
+    }, 1500);
 });
 
 /**
