@@ -237,789 +237,257 @@ Başka nasıl yardımcı olabilirim?`
 
 // Sayfa yüklendiğinde mevcut konuşmayı yükle
 window.addEventListener('DOMContentLoaded', () => {
-    // Mevcut konuşmayı yükle
-    if (currentConversationId && conversations[currentConversationId]) {
-        loadConversation(currentConversationId);
-    } else if (Object.keys(conversations).length > 0) {
-        // Eğer mevcut konuşma yoksa ama kaydedilmiş konuşmalar varsa, en son konuşmayı yükle
-        const sortedConversations = Object.values(conversations).sort((a, b) => {
-            return new Date(b.updatedAt) - new Date(a.updatedAt);
-        });
-        
-        if (sortedConversations.length > 0) {
-            loadConversation(sortedConversations[0].id);
-        } else {
-            // Test mesajları ekle (eğer hiç konuşma yoksa)
-            loadTestMessages();
-        }
-    } else {
-        // Test mesajları ekle (eğer hiç konuşma yoksa)
-        loadTestMessages();
+    // Ana container'ı oluştur
+    const mainContainer = document.querySelector('.main');
+    if (mainContainer) {
+        mainContainer.innerHTML = `
+            <div class="header">
+                <button class="menu-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="header-title">CepyX</div>
+            </div>
+            <div class="chat-container">
+                <div class="chat-messages"></div>
+            </div>
+            <div class="input-container">
+                <textarea class="message-input" placeholder="Bir mesaj yazın..." rows="1"></textarea>
+                <button id="sendButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        `;
     }
-    
-    // Konuşma listesini güncelle
-    updateConversationsList();
-    
-    // Tema değiştirme butonlarının olduğu div'e ekle
-    const themeSwitcher = document.querySelector('.theme-switcher');
-    if (themeSwitcher) {
-        
-        // Stil düzenlemeleri
-        themeSwitcher.style.flexWrap = 'wrap';
-        themeSwitcher.style.gap = '8px';
-        const themeButtons = themeSwitcher.querySelectorAll('.theme-btn');
-        themeButtons.forEach(btn => {
-            btn.style.flex = '1 0 calc(50% - 4px)';
-        });
-    }
-    
-    // Konuşma öğeleri için CSS stillerini ekle
+
+    // CSS stillerini ekle
     const style = document.createElement('style');
     style.textContent = `
-        /* Genel Mobil Uyumluluk */
-        html, body {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        
-        .container {
-            height: 100%;
-            max-height: 100%;
-            width: 100%;
-            max-width: 100%;
-            margin: 0;
-            padding: 0;
-            border-radius: 0;
-            box-shadow: none;
+        /* Ana Container Stilleri */
+        .main {
             display: flex;
             flex-direction: column;
-        }
-        
-        .content {
-            display: flex;
-            flex-direction: row;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        /* Mobil Uyumluluk */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -100%;
-                width: 85%;
-                max-width: 320px;
-                height: 100%;
-                z-index: 1000;
-                transition: left 0.3s ease;
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-                background-color: var(--bg-color);
-            }
-            
-            .sidebar.active {
-                left: 0;
-            }
-            
-            .sidebar-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-                display: none;
-            }
-            
-            .sidebar-overlay.active {
-                display: block;
-            }
-            
-            .main {
-                width: 100%;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                height: 100%;
-            }
-            
-            .header {
-                padding: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                height: 50px;
-                min-height: 50px;
-                border-bottom: 1px solid var(--border-color);
-                background-color: var(--bg-color);
-                position: sticky;
-                top: 0;
-                z-index: 10;
-            }
-            
-            .header-title {
-                font-size: 1.2rem;
-                margin-left: 10px;
-                flex: 1;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            
-            .menu-toggle {
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-                width: 40px;
-                height: 40px;
-                background: transparent;
-                border: none;
-                cursor: pointer;
-                color: var(--text-color);
-                padding: 0;
-                margin: 0;
-                border-radius: 50%;
-                transition: background-color 0.2s;
-            }
-            
-            .menu-toggle:active {
-                background-color: var(--bg-secondary);
-            }
-            
-            /* Chat Container Düzeltmeleri */
-            .chat-container {
-                position: relative;
-                height: calc(100vh - 120px);
-                overflow-y: auto;
-                overflow-x: hidden;
-                -webkit-overflow-scrolling: touch;
-                background-color: var(--bg-color);
-                padding-bottom: 80px;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .chat-messages {
-                flex: 1;
-                padding: 15px;
-                width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
-                display: flex;
-                flex-direction: column;
-                min-height: 100%;
-            }
-
-            /* Mesaj Görünümü Düzeltmeleri */
-            .message {
-                display: flex;
-                flex-direction: column;
-                max-width: 85%;
-                margin: 8px 0;
-                clear: both;
-                animation: fadeIn 0.3s ease;
-            }
-
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-
-            .message.user {
-                align-self: flex-end;
-                background-color: #4285f4;
-                color: white;
-                border-radius: 18px 18px 4px 18px;
-                padding: 12px 15px;
-                margin-left: 15%;
-            }
-
-            .message.assistant {
-                align-self: flex-start;
-                background-color: var(--bg-secondary, #2a2a2a);
-                color: var(--text-color);
-                border-radius: 18px 18px 18px 4px;
-                padding: 12px 15px;
-                margin-right: 15%;
-            }
-
-            .message-header {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 4px;
-                font-size: 13px;
-            }
-
-            .message-header .name {
-                font-weight: 500;
-            }
-
-            .message-header .time {
-                opacity: 0.7;
-            }
-
-            .message-content {
-                font-size: 15px;
-                line-height: 1.5;
-                word-wrap: break-word;
-                white-space: pre-wrap;
-            }
-
-            /* Düşünme Animasyonu */
-            .thinking-message {
-                align-self: flex-start;
-                background-color: var(--bg-secondary, #2a2a2a);
-                border-radius: 18px;
-                padding: 12px 15px;
-                margin: 8px 0;
-                display: flex;
-                align-items: center;
-                max-width: 100px;
-            }
-
-            .thinking-dots {
-                display: flex;
-                align-items: center;
-                gap: 4px;
-            }
-
-            .thinking-dots span {
-                width: 8px;
-                height: 8px;
-                background-color: var(--text-color);
-                border-radius: 50%;
-                opacity: 0.6;
-                animation: bounce 1.4s infinite ease-in-out both;
-            }
-
-            .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
-            .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
-
-            @keyframes bounce {
-                0%, 80%, 100% { transform: scale(0.6); }
-                40% { transform: scale(1); }
-            }
-
-            /* Giriş Alanı Düzeltmeleri */
-            .input-container {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background-color: var(--bg-color);
-                padding: 12px 15px;
-                border-top: 1px solid var(--border-color);
-                display: flex;
-                align-items: flex-end;
-                gap: 10px;
-                z-index: 100;
-            }
-
-            .message-input {
-                flex: 1;
-                min-height: 44px;
-                max-height: 120px;
-                padding: 12px 15px;
-                border-radius: 22px;
-                border: 1px solid var(--border-color);
-                background-color: var(--bg-secondary);
-                color: var(--text-color);
-                font-size: 15px;
-                line-height: 1.4;
-                resize: none;
-            }
-
-            #sendButton {
-                width: 44px;
-                height: 44px;
-                border-radius: 50%;
-                background-color: #4285f4;
-                color: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: none;
-                cursor: pointer;
-                padding: 0;
-                flex-shrink: 0;
-            }
-
-            /* iPhone X ve Üzeri için Güvenli Alan */
-            @supports (padding: max(0px)) {
-                .input-container {
-                    padding-bottom: max(12px, env(safe-area-inset-bottom));
-                }
-                
-                .chat-container {
-                    padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
-                }
-            }
-        }
-        
-        .conversation-item {
-            position: relative;
-        }
-        .conversation-item .rename-conversation,
-        .conversation-item .delete-conversation {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-            padding: 8px;
-            display: none;
-            z-index: 2;
-        }
-        .conversation-item:hover .rename-conversation,
-        .conversation-item:hover .delete-conversation {
-            display: block;
-        }
-        /* Mobil cihazlarda her zaman göster */
-        @media (max-width: 768px) {
-            .conversation-item .rename-conversation,
-            .conversation-item .delete-conversation {
-                display: block;
-                padding: 10px;
-            }
-        }
-        .conversation-item .rename-conversation:hover,
-        .conversation-item .delete-conversation:hover {
-            opacity: 1;
-        }
-        .conversation-item .rename-conversation {
-            right: 40px;
-            color: var(--text-color);
-        }
-        .conversation-item .delete-conversation {
-            right: 5px;
-            color: var(--danger-color, #ff5555);
-        }
-        .conversation-item .rename-conversation:active,
-        .conversation-item .delete-conversation:active {
-            opacity: 1;
-            transform: translateY(-50%) scale(1.1);
-        }
-        .conversation-title {
-            padding-right: 80px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 500;
-        }
-        
-        .conversation-date {
-            font-size: 0.8em;
-            opacity: 0.7;
-            margin-top: 4px;
-        }
-        
-        /* Modal Stilleri */
-        .modal-overlay {
+            height: 100vh;
+            width: 100vw;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-container {
             background-color: var(--bg-color);
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            padding: 25px;
-            width: 90%;
-            max-width: 400px;
-            transform: translateY(-20px);
-            transition: transform 0.3s;
         }
-        .modal-overlay.active .modal-container {
-            transform: translateY(0);
-        }
-        .modal-header {
+
+        /* Header Stilleri */
+        .header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            padding: 10px 15px;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: bold;
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-left: 15px;
             color: var(--text-color);
         }
-        .modal-close {
+
+        .menu-toggle {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: transparent;
             border: none;
-            font-size: 1.8rem;
             cursor: pointer;
             color: var(--text-color);
-            opacity: 0.7;
-            line-height: 1;
+            border-radius: 50%;
+            padding: 8px;
         }
-        .modal-close:hover {
-            opacity: 1;
+
+        .menu-toggle:active {
+            background-color: var(--bg-secondary);
         }
-        .modal-body {
-            margin-bottom: 25px;
-            color: var(--text-color);
-            line-height: 1.5;
+
+        /* Chat Container Stilleri */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-color: var(--bg-color);
+            position: relative;
+            padding-bottom: 80px;
         }
-        .modal-footer {
+
+        .chat-messages {
+            padding: 15px;
             display: flex;
-            justify-content: flex-end;
-            gap: 15px;
+            flex-direction: column;
+            gap: 8px;
         }
-        .modal-btn {
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s, transform 0.1s;
-            font-size: 1rem;
+
+        /* Mesaj Stilleri */
+        .message {
+            max-width: 85%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            font-size: 15px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
         }
-        .modal-btn:active {
-            transform: scale(0.98);
+
+        .message.user {
+            align-self: flex-end;
+            background-color: #4285f4;
+            color: white;
+            border-bottom-right-radius: 4px;
+            margin-left: 15%;
         }
-        .modal-btn-cancel {
+
+        .message.assistant {
+            align-self: flex-start;
             background-color: var(--bg-secondary);
             color: var(--text-color);
+            border-bottom-left-radius: 4px;
+            margin-right: 15%;
         }
-        .modal-btn-cancel:hover {
-            background-color: var(--bg-hover);
-        }
-        .modal-btn-confirm {
-            background-color: var(--danger-color, #ff5555);
-            color: white;
-        }
-        .modal-btn-confirm:hover {
-            background-color: var(--danger-hover-color, #ff3333);
-        }
-        
-        /* Gönder Butonu Animasyonu */
-        #sendButton {
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        #sendButton.loading {
-            background-color: var(--danger-color, #ff5555);
-        }
-        
-        #sendButton .send-icon {
+
+        .message-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 13px;
+            opacity: 0.8;
         }
-        
-        #sendButton.loading .send-icon {
-            transform: scale(0);
-            opacity: 0;
-        }
-        
-        #sendButton .loading-icon {
-            position: absolute;
-            top: 0;
+
+        /* Input Container Stilleri */
+        .input-container {
+            position: fixed;
+            bottom: 0;
             left: 0;
             right: 0;
-            bottom: 0;
+            padding: 12px 15px;
+            background-color: var(--bg-color);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-color);
+            font-size: 15px;
+            line-height: 1.4;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+
+        #sendButton {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #4285f4;
+            border: none;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            transform: scale(0);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        
-        #sendButton.loading .loading-icon {
-            transform: scale(1);
-            opacity: 1;
-        }
-        
-        .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        
-        .stop-icon {
-            width: 14px;
-            height: 14px;
-            background-color: white;
-            border-radius: 2px;
-        }
-        
-        /* Kod bloğu stilleri */
-        pre {
-            position: relative;
-        }
-        
-        .copy-button {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
-            border: none;
-            border-radius: 4px;
-            padding: 5px 8px;
-            font-size: 12px;
             cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
+            flex-shrink: 0;
+            padding: 0;
+            transition: transform 0.2s;
         }
-        
-        .copy-button:hover {
-            opacity: 1;
+
+        #sendButton:active {
+            transform: scale(0.95);
         }
-        
-        /* Düşünme animasyonu */
-        .thinking {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            color: var(--text-secondary-color);
-            font-style: italic;
+
+        /* Animasyonlar */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .thinking-dots {
-            display: inline-flex;
-            margin-left: 5px;
-        }
-        
-        .thinking-dots span {
-            width: 5px;
-            height: 5px;
-            margin: 0 2px;
-            background-color: currentColor;
-            border-radius: 50%;
-            animation: thinking 1.4s infinite ease-in-out both;
-        }
-        
-        .thinking-dots span:nth-child(1) {
-            animation-delay: -0.32s;
-        }
-        
-        .thinking-dots span:nth-child(2) {
-            animation-delay: -0.16s;
-        }
-        
-        @keyframes thinking {
-            0%, 80%, 100% { 
-                transform: scale(0);
-            } 40% { 
-                transform: scale(1);
+
+        /* iPhone X ve Üzeri için Güvenli Alan */
+        @supports (padding: max(0px)) {
+            .input-container {
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+            }
+            
+            .chat-container {
+                padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
             }
         }
     `;
     document.head.appendChild(style);
-    
-    // Modal HTML'ini oluştur
-    const modalHTML = `
-        <div id="deleteModal" class="modal-overlay">
-            <div class="modal-container">
-                <div class="modal-header">
-                    <div class="modal-title">Konuşmayı Sil</div>
-                    <button class="modal-close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Bu konuşmayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
-                </div>
-                <div class="modal-footer">
-                    <button class="modal-btn modal-btn-cancel">İptal</button>
-                    <button class="modal-btn modal-btn-confirm">Sil</button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Modal'ı body'ye ekle
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Gönder butonunu güncelle
-    if (sendButton) {
-        // Mevcut içeriği kaydet
-        const originalContent = sendButton.innerHTML;
-        
-        // Yeni içerik ekle
-        sendButton.innerHTML = `
-            <span class="send-icon">${originalContent}</span>
-            <span class="loading-icon">
-                <div class="stop-icon"></div>
-            </span>
-        `;
-    }
-    
-    // Mobil menü butonunu ekle
-    const header = document.querySelector('.header');
-    if (header) {
-        const menuToggle = document.createElement('button');
-        menuToggle.className = 'menu-toggle';
-        menuToggle.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        `;
-        header.prepend(menuToggle);
-        
-        // Sidebar overlay ekle
-        const sidebarOverlay = document.createElement('div');
-        sidebarOverlay.className = 'sidebar-overlay';
-        document.body.appendChild(sidebarOverlay);
-        
-        // Menü toggle olayı
-        menuToggle.addEventListener('click', function() {
-            console.log('Menü butonuna tıklandı');
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar) {
-                sidebar.classList.toggle('active');
-                sidebarOverlay.classList.toggle('active');
-                console.log('Sidebar durumu:', sidebar.classList.contains('active'));
-            }
-        });
-        
-        // Overlay tıklama olayı
-        sidebarOverlay.addEventListener('click', function() {
-            console.log('Overlay tıklandı');
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar) {
-                sidebar.classList.remove('active');
-                sidebarOverlay.classList.remove('active');
-            }
-        });
-    }
-    
-    // Yükleme ekranını gizle
-    setTimeout(() => {
-        loaderContainer.style.opacity = '0';
-        setTimeout(() => {
-            loaderContainer.style.display = 'none';
-            content.style.opacity = '1';
-        }, 500);
-    }, 1000);
-    
-    // Mobil cihazlarda viewport meta etiketini güncelle
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
-    if (viewportMeta) {
-        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-    } else {
-        const meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-        document.head.appendChild(meta);
-    }
-    
-    // Mobil cihazlarda mesaj gönderme alanını düzelt
-    const inputContainer = document.querySelector('.input-container');
+
+    // Input olaylarını ekle
     const messageInput = document.querySelector('.message-input');
-    
-    if (inputContainer && messageInput) {
-        // Mesaj giriş alanını düzelt
-        messageInput.style.fontSize = '16px'; // iOS'ta yakınlaştırmayı önler
-        
-        // Mesaj giriş alanının yüksekliğini otomatik ayarla
+    if (messageInput) {
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
             
-            // Maksimum yüksekliği sınırla
-            if (this.scrollHeight > 100) {
-                this.style.height = '100px';
+            if (this.scrollHeight > 120) {
+                this.style.height = '120px';
                 this.style.overflowY = 'auto';
             } else {
                 this.style.overflowY = 'hidden';
             }
         });
     }
-    
-    // Mobil cihazlarda mesaj alanını en alta kaydır
+
+    // Menü butonuna tıklama olayı ekle
+    const menuButton = document.querySelector('.menu-toggle');
+    if (menuButton) {
+        menuButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+        });
+    }
+
+    // Otomatik kaydırma için observer ekle
     const chatMessages = document.querySelector('.chat-messages');
     if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        
-        // Yeni mesaj eklendiğinde otomatik kaydır
         const observer = new MutationObserver(() => {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         });
         
         observer.observe(chatMessages, { childList: true });
     }
-    
-    // CSS değişkenlerini ayarla
-    document.documentElement.style.setProperty('--primary-color-rgb', '66, 133, 244');
-    
-    // Menü açılma sorununu çözmek için ek kontrol
-    setTimeout(() => {
-        const menuButton = document.querySelector('.menu-toggle');
-        if (menuButton) {
-            // Orijinal olay dinleyicisini kaldır
-            const oldMenuButton = menuButton.cloneNode(true);
-            menuButton.parentNode.replaceChild(oldMenuButton, menuButton);
-            
-            // Yeni olay dinleyicisi ekle
-            oldMenuButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Yeni menü tıklama olayı');
-                
-                const sidebar = document.querySelector('.sidebar');
-                const overlay = document.querySelector('.sidebar-overlay');
-                
-                if (sidebar && overlay) {
-                    if (sidebar.classList.contains('active')) {
-                        sidebar.classList.remove('active');
-                        overlay.classList.remove('active');
-                    } else {
-                        sidebar.classList.add('active');
-                        overlay.classList.add('active');
-                    }
-                    console.log('Sidebar durumu (yeni):', sidebar.classList.contains('active'));
-                }
-            });
-        }
-    }, 1000);
 });
 
 /**
