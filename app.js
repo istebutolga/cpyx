@@ -273,6 +273,237 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Konuşma öğeleri için CSS stillerini ekle
+    const style = document.createElement('style');
+    style.textContent = `
+        .conversation-item {
+            position: relative;
+        }
+        .conversation-item .rename-conversation,
+        .conversation-item .delete-conversation {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            padding: 5px;
+            display: none;
+        }
+        .conversation-item:hover .rename-conversation,
+        .conversation-item:hover .delete-conversation {
+            display: block;
+        }
+        .conversation-item .rename-conversation:hover,
+        .conversation-item .delete-conversation:hover {
+            opacity: 1;
+        }
+        .conversation-item .rename-conversation {
+            right: 35px;
+            color: var(--text-color);
+        }
+        .conversation-item .delete-conversation {
+            right: 5px;
+            color: var(--danger-color, #ff5555);
+        }
+        .conversation-title {
+            padding-right: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Modal Stilleri */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-container {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(-20px);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+        .modal-close:hover {
+            opacity: 1;
+        }
+        .modal-body {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .modal-btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .modal-btn-cancel {
+            background-color: var(--bg-secondary);
+            color: var(--text-color);
+        }
+        .modal-btn-cancel:hover {
+            background-color: var(--bg-hover);
+        }
+        .modal-btn-confirm {
+            background-color: var(--danger-color, #ff5555);
+            color: white;
+        }
+        .modal-btn-confirm:hover {
+            background-color: var(--danger-hover-color, #ff3333);
+        }
+        
+        /* Gönder Butonu Animasyonu */
+        #sendButton {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #sendButton.loading {
+            background-color: var(--danger-color, #ff5555);
+        }
+        
+        #sendButton .send-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        
+        #sendButton.loading .send-icon {
+            transform: scale(0);
+            opacity: 0;
+        }
+        
+        #sendButton .loading-icon {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        #sendButton.loading .loading-icon {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .stop-icon {
+            width: 14px;
+            height: 14px;
+            background-color: white;
+            border-radius: 2px;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Modal HTML'ini oluştur
+    const modalHTML = `
+        <div id="deleteModal" class="modal-overlay">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <div class="modal-title">Konuşmayı Sil</div>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Bu konuşmayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn modal-btn-cancel">İptal</button>
+                    <button class="modal-btn modal-btn-confirm">Sil</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Modal'ı body'ye ekle
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Gönder butonunu güncelle
+    if (sendButton) {
+        // Mevcut içeriği kaydet
+        const originalContent = sendButton.innerHTML;
+        
+        // Yeni içerik ekle
+        sendButton.innerHTML = `
+            <span class="send-icon">${originalContent}</span>
+            <span class="loading-icon">
+                <div class="stop-icon"></div>
+            </span>
+        `;
+    }
+    
     // Yükleme ekranını gizle
     setTimeout(() => {
         loaderContainer.style.opacity = '0';
@@ -410,7 +641,12 @@ function updateConversationsList() {
         conversationItem.innerHTML = `
             <div class="conversation-title">${conversation.title}</div>
             <div class="conversation-date">${formattedDate}</div>
-            <button class="delete-conversation" data-id="${conversation.id}">
+            <button class="rename-conversation" data-id="${conversation.id}" title="Yeniden Adlandır">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                </svg>
+            </button>
+            <button class="delete-conversation" data-id="${conversation.id}" title="Sil">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -428,6 +664,14 @@ function updateConversationsList() {
                 return;
             }
             
+            // Yeniden adlandırma butonuna tıklandıysa
+            if (e.target.closest('.rename-conversation')) {
+                e.stopPropagation();
+                const id = e.target.closest('.rename-conversation').dataset.id;
+                renameConversation(id);
+                return;
+            }
+            
             loadConversation(conversation.id);
         });
         
@@ -441,20 +685,68 @@ function updateConversationsList() {
  */
 function deleteConversation(conversationId) {
     if (conversations[conversationId]) {
-        // Konuşmayı sil
-        delete conversations[conversationId];
-        localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
+        // Modal'ı göster
+        const modal = document.getElementById('deleteModal');
+        modal.classList.add('active');
         
-        // Eğer mevcut konuşma silindiyse, yeni bir konuşma oluştur
-        if (conversationId === currentConversationId) {
-            chatHistory = [];
-            chatMessages.innerHTML = '';
-            currentConversationId = null;
-            localStorage.removeItem(CURRENT_CONVERSATION_KEY);
-        }
+        // Konuşma başlığını modal içeriğine ekle
+        const modalBody = modal.querySelector('.modal-body');
+        const conversationTitle = conversations[conversationId].title;
+        modalBody.innerHTML = `
+            <p>"<strong>${conversationTitle}</strong>" konuşmasını silmek istediğinizden emin misiniz?</p>
+            <p>Bu işlem geri alınamaz.</p>
+        `;
         
-        // Konuşma listesini güncelle
-        updateConversationsList();
+        // Modal kapatma butonu
+        const closeBtn = modal.querySelector('.modal-close');
+        closeBtn.onclick = () => {
+            modal.classList.remove('active');
+        };
+        
+        // İptal butonu
+        const cancelBtn = modal.querySelector('.modal-btn-cancel');
+        cancelBtn.onclick = () => {
+            modal.classList.remove('active');
+        };
+        
+        // Silme onay butonu
+        const confirmBtn = modal.querySelector('.modal-btn-confirm');
+        confirmBtn.onclick = () => {
+            // Konuşmayı sil
+            if (conversations[conversationId]) {
+                // Konuşmayı sil
+                delete conversations[conversationId];
+                localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
+                
+                // Eğer mevcut konuşma silindiyse, yeni bir konuşma oluştur
+                if (conversationId === currentConversationId) {
+                    chatHistory = [];
+                    chatMessages.innerHTML = '';
+                    currentConversationId = null;
+                    localStorage.removeItem(CURRENT_CONVERSATION_KEY);
+                }
+                
+                // Konuşma listesini güncelle
+                updateConversationsList();
+            }
+            
+            // Modal'ı kapat
+            modal.classList.remove('active');
+        };
+        
+        // Modal dışına tıklandığında kapat
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        };
+        
+        // ESC tuşuna basıldığında modal'ı kapat
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                modal.classList.remove('active');
+            }
+        });
     }
 }
 
@@ -940,12 +1232,28 @@ function makeXhrRequest(url, timeout = API_CONFIG.timeout) {
     });
 }
 
+// Yanıt iptal kontrolü için değişken
+let isResponseCancelled = false;
+
 /**
  * Mesaj gönderme fonksiyonu
  */
 async function sendMessage() {
     const message = messageInput.value.trim();
     if (!message) return;
+
+    // Eğer zaten yanıt bekliyorsak ve buton durdurma modundaysa, yanıtı iptal et
+    if (sendButton.classList.contains('loading')) {
+        isResponseCancelled = true;
+        sendButton.classList.remove('loading');
+        return;
+    }
+    
+    // Yanıt iptal bayrağını sıfırla
+    isResponseCancelled = false;
+    
+    // Gönder butonunu yükleniyor durumuna getir
+    sendButton.classList.add('loading');
 
     // Yeni eklenen targetUrl tanımı
     const targetUrl = `${API_CONFIG.url}$prompt=${encodeURIComponent(message)}`;
@@ -1019,6 +1327,15 @@ Mevcut konuşma bağlamı:
         let finalResponse;
         let success = false;
         
+        // Yanıt iptal edildi mi kontrol et
+        if (isResponseCancelled) {
+            if (thinkingMsg) {
+                thinkingMsg.remove();
+            }
+            sendButton.classList.remove('loading');
+            return;
+        }
+        
         if (cachedResponse) {
             finalResponse = cachedResponse;
             success = true;
@@ -1028,6 +1345,16 @@ Mevcut konuşma bağlamı:
             console.log('Doğrudan bağlantı deneniyor (XHR):', targetUrl);
             try {
                 const data = await makeXhrRequest(targetUrl);
+                
+                // Yanıt iptal edildi mi kontrol et
+                if (isResponseCancelled) {
+                    if (thinkingMsg) {
+                        thinkingMsg.remove();
+                    }
+                    sendButton.classList.remove('loading');
+                    return;
+                }
+                
                 if (data && data.message) {
                     finalResponse = data.message;
                     cacheResponse(message, finalResponse);
@@ -1036,16 +1363,43 @@ Mevcut konuşma bağlamı:
                 }
             } catch (error) {
                 console.log('Doğrudan bağlantı hatası (XHR):', error.message);
+                
+                // Yanıt iptal edildi mi kontrol et
+                if (isResponseCancelled) {
+                    if (thinkingMsg) {
+                        thinkingMsg.remove();
+                    }
+                    sendButton.classList.remove('loading');
+                    return;
+                }
             }
             
             // Proxy fallback sistemi
             if (!success) {
                 console.log('Proxy sistemine geçiliyor (XHR)');
                 for (const proxy of API_CONFIG.fallbackProxies) {
+                    // Yanıt iptal edildi mi kontrol et
+                    if (isResponseCancelled) {
+                        if (thinkingMsg) {
+                            thinkingMsg.remove();
+                        }
+                        sendButton.classList.remove('loading');
+                        return;
+                    }
+                    
                     try {
                         console.log(`${proxy} deneniyor (XHR)...`);
                         const proxyUrl = `${proxy}${encodeURIComponent(targetUrl)}`;
                         const data = await makeXhrRequest(proxyUrl);
+                        
+                        // Yanıt iptal edildi mi kontrol et
+                        if (isResponseCancelled) {
+                            if (thinkingMsg) {
+                                thinkingMsg.remove();
+                            }
+                            sendButton.classList.remove('loading');
+                            return;
+                        }
                         
                         if (data && data.message) {
                             finalResponse = data.message;
@@ -1106,6 +1460,9 @@ Mevcut konuşma bağlamı:
             </div>`;
 
         appendMessage('assistant', errorMessage, false);
+    } finally {
+        // Gönder butonunu normal duruma getir
+        sendButton.classList.remove('loading');
     }
 }
 
@@ -1721,4 +2078,33 @@ async function getFallbackResponse(prompt) {
     }
     // Genel cevap
     return `# CepyX\n\nÜzgünüm, şu anda API bağlantı sorunu yaşıyorum ve sorunuza detaylı yanıt veremiyorum. Lütfen:\n\n1. Daha kısa veya basit bir soru sormayı deneyin\n2. Birkaç dakika sonra tekrar deneyin\n3. Tarayıcınızı yenileyin\n\nSorun devam ederse, bu geçici bir sunucu sorunu olabilir. En kısa sürede düzeltilecektir.\n\n> İletişim: https://t.me/clonicglobal\n\nNot: Bu mesaj, API bağlantı sorunu nedeniyle otomatik olarak gönderilmiştir. Lütfen sabrınız için teşekkür ederiz.`;
+}
+
+/**
+ * Konuşmayı yeniden adlandırır
+ * @param {string} conversationId - Yeniden adlandırılacak konuşma ID'si
+ */
+function renameConversation(conversationId) {
+    if (conversations[conversationId]) {
+        // Mevcut başlığı al
+        const currentTitle = conversations[conversationId].title;
+        
+        // Yeni başlık için prompt göster
+        const newTitle = prompt('Konuşma başlığını düzenle:', currentTitle);
+        
+        // Eğer kullanıcı iptal ettiyse veya boş bir başlık girdiyse işlemi iptal et
+        if (newTitle === null || newTitle.trim() === '') {
+            return;
+        }
+        
+        // Başlığı güncelle
+        conversations[conversationId].title = newTitle.trim();
+        conversations[conversationId].updatedAt = new Date().toISOString();
+        
+        // LocalStorage'a kaydet
+        localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
+        
+        // Konuşma listesini güncelle
+        updateConversationsList();
+    }
 }
