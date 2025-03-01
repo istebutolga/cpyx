@@ -240,340 +240,32 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log('DOM yüklendi, uygulama başlatılıyor...');
     
     // Ana container'ı oluştur
-    const mainContainer = document.querySelector('.main');
+    const mainContainer = document.querySelector('.container');
     if (mainContainer) {
-        mainContainer.innerHTML = `
-            <div class="header">
-                <button class="menu-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
-                <div class="header-title">CepyX</div>
-            </div>
-            <div class="chat-container">
-                <div class="chat-messages"></div>
-            </div>
-            <div class="input-container">
-                <textarea class="message-input" placeholder="Bir mesaj yazın..." rows="1"></textarea>
-                <button id="sendButton">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
-            </div>
-        `;
+        console.log('Ana container bulundu, içerik yükleniyor...');
         
-        // Ana içeriği hemen göster
-        mainContainer.style.display = 'flex';
-        mainContainer.style.opacity = '1';
+        // Konuşma listesini güncelle
+        updateConversationsList();
+        
+        // Mevcut konuşmayı yükle veya yeni bir konuşma oluştur
+        const currentConversationId = localStorage.getItem(CURRENT_CONVERSATION_KEY);
+        if (currentConversationId) {
+            loadConversation(currentConversationId);
+        } else {
+            createNewConversation();
+        }
+        
+        // Test mesajlarını yükle
+        setTimeout(() => {
+            loadTestMessages();
+            console.log('Test mesajları yüklendi!');
+        }, 100);
+    } else {
+        console.error('Ana container bulunamadı!');
     }
 
-    // CSS stillerini ekle
-    const style = document.createElement('style');
-    style.textContent = `
-        /* Ana Container Stilleri */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background-color: #1a1a1a;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        
-        .main {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            width: 100vw;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: #1a1a1a;
-        }
-
-        /* Header Stilleri */
-        .header {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            background-color: #1a1a1a;
-            border-bottom: 1px solid #333;
-            height: 56px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-title {
-            font-size: 1.2rem;
-            font-weight: 500;
-            margin-left: 15px;
-            color: #ffffff;
-        }
-
-        .menu-toggle {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: #ffffff;
-            border-radius: 50%;
-            padding: 8px;
-        }
-
-        .menu-toggle:active {
-            background-color: #333;
-        }
-
-        /* Chat Container Stilleri */
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            background-color: #1a1a1a;
-            position: relative;
-            padding-bottom: 80px;
-        }
-
-        .chat-messages {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        /* Mesaj Stilleri */
-        .message {
-            max-width: 85%;
-            padding: 12px 15px;
-            border-radius: 18px;
-            position: relative;
-            word-wrap: break-word;
-            font-size: 15px;
-            line-height: 1.4;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .message.user {
-            align-self: flex-end;
-            background-color: #4285f4;
-            color: white;
-            border-bottom-right-radius: 4px;
-            margin-left: 15%;
-        }
-
-        .message.assistant {
-            align-self: flex-start;
-            background-color: #333;
-            color: #ffffff;
-            border-bottom-left-radius: 4px;
-            margin-right: 15%;
-        }
-
-        .message-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 4px;
-            font-size: 13px;
-            opacity: 0.8;
-        }
-
-        /* Input Container Stilleri */
-        .input-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 12px 15px;
-            background-color: #1a1a1a;
-            border-top: 1px solid #333;
-            display: flex;
-            align-items: flex-end;
-            gap: 10px;
-            z-index: 100;
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 12px 15px;
-            border-radius: 20px;
-            border: 1px solid #333;
-            background-color: #333;
-            color: #ffffff;
-            font-size: 15px;
-            line-height: 1.4;
-            resize: none;
-            min-height: 44px;
-            max-height: 120px;
-        }
-
-        .message-input:focus {
-            outline: none;
-            border-color: #4285f4;
-        }
-
-        #sendButton {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background-color: #4285f4;
-            border: none;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            padding: 0;
-            transition: transform 0.2s;
-        }
-
-        #sendButton:active {
-            transform: scale(0.95);
-        }
-
-        /* Animasyonlar */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* iPhone X ve Üzeri için Güvenli Alan */
-        @supports (padding: max(0px)) {
-            .input-container {
-                padding-bottom: max(12px, env(safe-area-inset-bottom));
-            }
-            
-            .chat-container {
-                padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
-            }
-        }
-        
-        /* Düşünme Animasyonu */
-        .thinking-message {
-            align-self: flex-start;
-            background-color: #333;
-            border-radius: 18px;
-            padding: 12px 15px;
-            margin: 8px 0;
-            display: flex;
-            align-items: center;
-            max-width: 100px;
-        }
-
-        .thinking-dots {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .thinking-dots span {
-            width: 8px;
-            height: 8px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            opacity: 0.6;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-
-        .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0.6); }
-            40% { transform: scale(1); }
-        }
-        
-        /* Gönder Butonu Animasyonu */
-        #sendButton .send-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-        }
-        
-        #sendButton.loading .send-icon {
-            transform: scale(0);
-            opacity: 0;
-        }
-        
-        #sendButton .loading-icon {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transform: scale(0);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        
-        #sendButton.loading .loading-icon {
-            transform: scale(1);
-            opacity: 1;
-        }
-        
-        .stop-icon {
-            width: 14px;
-            height: 14px;
-            background-color: white;
-            border-radius: 2px;
-        }
-        
-        /* Sidebar Stilleri */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -100%;
-            width: 85%;
-            max-width: 320px;
-            height: 100%;
-            background-color: #1a1a1a;
-            z-index: 1000;
-            transition: left 0.3s ease;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .sidebar.active {
-            left: 0;
-        }
-        
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            display: none;
-        }
-        
-        .sidebar-overlay.active {
-            display: block;
-        }
-    `;
-    document.head.appendChild(style);
-
     // Input olaylarını ekle
-    const messageInput = document.querySelector('.message-input');
+    const messageInput = document.querySelector('#messageInput');
     if (messageInput) {
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
@@ -586,63 +278,19 @@ window.addEventListener('DOMContentLoaded', () => {
                 this.style.overflowY = 'hidden';
             }
         });
-        
-        // Enter tuşuna basıldığında mesaj gönder
-        messageInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
     }
 
     // Menü butonuna tıklama olayı ekle
-    const menuButton = document.querySelector('.menu-toggle');
+    const menuButton = document.querySelector('#toggleSidebar');
     if (menuButton) {
-        menuButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Sidebar ve overlay oluştur (eğer yoksa)
-            let sidebar = document.querySelector('.sidebar');
-            let overlay = document.querySelector('.sidebar-overlay');
-            
-            if (!sidebar) {
-                sidebar = document.createElement('div');
-                sidebar.className = 'sidebar';
-                sidebar.innerHTML = `
-                    <div class="sidebar-header">
-                        <h2>Konuşmalar</h2>
-                    </div>
-                    <div class="conversation-list"></div>
-                    <button class="new-chat-btn">Yeni Konuşma</button>
-                `;
-                document.body.appendChild(sidebar);
-            }
-            
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.className = 'sidebar-overlay';
-                document.body.appendChild(overlay);
-                
-                // Overlay tıklama olayı
-                overlay.addEventListener('click', function() {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                });
-            }
-            
-            // Sidebar ve overlay'i göster/gizle
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            
-            // Konuşma listesini güncelle
-            updateConversationsList();
+        menuButton.addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
         });
     }
 
     // Otomatik kaydırma için observer ekle
-    const chatMessages = document.querySelector('.chat-messages');
+    const chatMessages = document.querySelector('#chatMessages');
     if (chatMessages) {
         const observer = new MutationObserver(() => {
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -651,33 +299,30 @@ window.addEventListener('DOMContentLoaded', () => {
         observer.observe(chatMessages, { childList: true });
     }
 
-    // Gönder butonunu güncelle
+    // Gönder butonuna tıklama olayı ekle
     const sendButton = document.querySelector('#sendButton');
     if (sendButton) {
-        // Mevcut içeriği kaydet
-        const originalContent = sendButton.innerHTML;
-        
-        // Yeni içerik ekle
-        sendButton.innerHTML = `
-            <span class="send-icon">${originalContent}</span>
-            <span class="loading-icon">
-                <div class="stop-icon"></div>
-            </span>
-        `;
-        
-        // Gönder butonuna tıklama olayı ekle
-        sendButton.addEventListener('click', function() {
-            sendMessage();
+        sendButton.addEventListener('click', sendMessage);
+    }
+    
+    // Yeni konuşma butonuna tıklama olayı ekle
+    const newChatBtn = document.querySelector('#newChatBtn');
+    if (newChatBtn) {
+        newChatBtn.addEventListener('click', function() {
+            createNewConversation();
         });
     }
-
-    console.log('Uygulama yükleniyor...');
     
-    // Test mesajlarını yükle
-    setTimeout(() => {
-        loadTestMessages();
-        console.log('Test mesajları yüklendi!');
-    }, 100);
+    // Tema butonlarına olay dinleyicileri ekle
+    const darkThemeBtn = document.querySelector('#darkTheme');
+    const lightThemeBtn = document.querySelector('#lightTheme');
+    
+    if (darkThemeBtn && lightThemeBtn) {
+        darkThemeBtn.addEventListener('click', () => setTheme('dark'));
+        lightThemeBtn.addEventListener('click', () => setTheme('light'));
+    }
+    
+    console.log('Uygulama başarıyla başlatıldı!');
 });
 
 /**
