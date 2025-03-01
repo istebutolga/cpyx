@@ -283,6 +283,7 @@ window.addEventListener('DOMContentLoaded', () => {
             margin: 0;
             padding: 0;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -291,6 +292,7 @@ window.addEventListener('DOMContentLoaded', () => {
             left: 0;
             right: 0;
             bottom: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         
         .container {
@@ -319,18 +321,18 @@ window.addEventListener('DOMContentLoaded', () => {
             .sidebar {
                 position: fixed;
                 top: 0;
-                left: 0;
+                left: -100%;
                 width: 85%;
                 max-width: 320px;
                 height: 100%;
                 z-index: 1000;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
+                transition: left 0.3s ease;
                 box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+                background-color: var(--bg-color);
             }
             
             .sidebar.active {
-                transform: translateX(0);
+                left: 0;
             }
             
             .sidebar-overlay {
@@ -364,6 +366,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 height: 50px;
                 min-height: 50px;
                 border-bottom: 1px solid var(--border-color);
+                background-color: var(--bg-color);
+                position: sticky;
+                top: 0;
+                z-index: 10;
             }
             
             .header-title {
@@ -387,6 +393,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 color: var(--text-color);
                 padding: 0;
                 margin: 0;
+                border-radius: 50%;
+                transition: background-color 0.2s;
+            }
+            
+            .menu-toggle:active {
+                background-color: var(--bg-secondary);
             }
             
             .chat-container {
@@ -395,36 +407,60 @@ window.addEventListener('DOMContentLoaded', () => {
                 flex-direction: column;
                 height: calc(100% - 110px);
                 overflow: hidden;
+                background-color: var(--bg-color);
             }
             
             .chat-messages {
                 flex: 1;
-                padding: 10px;
+                padding: 15px;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
+                background-color: var(--bg-color);
             }
             
             .message {
-                padding: 10px;
-                margin-bottom: 10px;
-                border-radius: 8px;
-                max-width: 90%;
+                padding: 12px 15px;
+                margin-bottom: 15px;
+                border-radius: 18px;
+                max-width: 85%;
+                line-height: 1.4;
+                position: relative;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             }
             
             .message.user {
                 margin-left: auto;
                 background-color: var(--primary-color);
                 color: white;
+                border-bottom-right-radius: 5px;
             }
             
             .message.assistant {
                 margin-right: auto;
                 background-color: var(--bg-secondary);
                 color: var(--text-color);
+                border-bottom-left-radius: 5px;
+            }
+            
+            .message pre {
+                max-width: 100%;
+                overflow-x: auto;
+                background-color: rgba(0, 0, 0, 0.1);
+                padding: 10px;
+                border-radius: 8px;
+                margin: 10px 0;
+            }
+            
+            .message code {
+                font-family: 'Courier New', monospace;
+                font-size: 0.9em;
+                background-color: rgba(0, 0, 0, 0.1);
+                padding: 2px 4px;
+                border-radius: 4px;
             }
             
             .input-container {
-                padding: 10px;
+                padding: 10px 15px;
                 background-color: var(--bg-color);
                 border-top: 1px solid var(--border-color);
                 display: flex;
@@ -434,24 +470,33 @@ window.addEventListener('DOMContentLoaded', () => {
                 max-height: 150px;
                 width: 100%;
                 box-sizing: border-box;
+                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
             }
             
             .message-input {
                 flex: 1;
-                padding: 12px;
+                padding: 12px 15px;
                 border-radius: 20px;
                 border: 1px solid var(--border-color);
                 background-color: var(--bg-secondary);
                 color: var(--text-color);
                 resize: none;
                 max-height: 100px;
-                margin-right: 8px;
+                margin-right: 10px;
                 font-size: 16px;
+                line-height: 1.4;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            
+            .message-input:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
             }
             
             #sendButton {
-                width: 40px;
-                height: 40px;
+                width: 45px;
+                height: 45px;
                 border-radius: 50%;
                 background-color: var(--primary-color);
                 color: white;
@@ -462,31 +507,60 @@ window.addEventListener('DOMContentLoaded', () => {
                 cursor: pointer;
                 padding: 0;
                 flex-shrink: 0;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                transition: transform 0.2s, background-color 0.3s;
+            }
+            
+            #sendButton:active {
+                transform: scale(0.95);
             }
             
             .new-chat-btn {
-                margin: 10px;
-                padding: 10px;
-                border-radius: 8px;
-                width: calc(100% - 20px);
+                margin: 15px;
+                padding: 12px 15px;
+                border-radius: 10px;
+                width: calc(100% - 30px);
                 text-align: center;
+                background-color: var(--primary-color);
+                color: white;
+                font-weight: 500;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                transition: background-color 0.2s;
+            }
+            
+            .new-chat-btn:active {
+                background-color: var(--primary-dark-color, #3a6cf3);
             }
             
             .conversation-list {
-                height: calc(100% - 70px);
+                height: calc(100% - 80px);
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
+                padding: 5px 0;
             }
             
             .conversation-item {
                 padding: 12px 15px;
-                border-radius: 8px;
+                border-radius: 10px;
                 margin: 5px 10px;
+                background-color: var(--bg-secondary);
+                transition: background-color 0.2s;
+                position: relative;
+            }
+            
+            .conversation-item.active {
+                background-color: rgba(var(--primary-color-rgb), 0.1);
+                border-left: 3px solid var(--primary-color);
+            }
+            
+            .conversation-item:active {
+                background-color: var(--bg-hover);
             }
             
             .modal-container {
                 width: 95%;
-                padding: 15px;
+                padding: 20px;
+                border-radius: 15px;
             }
             
             /* Dokunmatik cihazlar için iyileştirmeler */
@@ -497,7 +571,7 @@ window.addEventListener('DOMContentLoaded', () => {
             /* iPhone X ve üzeri için güvenli alan */
             @supports (padding: max(0px)) {
                 .input-container {
-                    padding-bottom: max(10px, env(safe-area-inset-bottom));
+                    padding-bottom: max(15px, env(safe-area-inset-bottom));
                 }
                 
                 .sidebar {
@@ -520,8 +594,9 @@ window.addEventListener('DOMContentLoaded', () => {
             cursor: pointer;
             opacity: 0.6;
             transition: opacity 0.2s;
-            padding: 5px;
+            padding: 8px;
             display: none;
+            z-index: 2;
         }
         .conversation-item:hover .rename-conversation,
         .conversation-item:hover .delete-conversation {
@@ -532,6 +607,7 @@ window.addEventListener('DOMContentLoaded', () => {
             .conversation-item .rename-conversation,
             .conversation-item .delete-conversation {
                 display: block;
+                padding: 10px;
             }
         }
         .conversation-item .rename-conversation:hover,
@@ -539,7 +615,7 @@ window.addEventListener('DOMContentLoaded', () => {
             opacity: 1;
         }
         .conversation-item .rename-conversation {
-            right: 35px;
+            right: 40px;
             color: var(--text-color);
         }
         .conversation-item .delete-conversation {
@@ -549,12 +625,20 @@ window.addEventListener('DOMContentLoaded', () => {
         .conversation-item .rename-conversation:active,
         .conversation-item .delete-conversation:active {
             opacity: 1;
+            transform: translateY(-50%) scale(1.1);
         }
         .conversation-title {
-            padding-right: 70px;
+            padding-right: 80px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-weight: 500;
+        }
+        
+        .conversation-date {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-top: 4px;
         }
         
         /* Modal Stilleri */
@@ -579,9 +663,9 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         .modal-container {
             background-color: var(--bg-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            padding: 25px;
             width: 90%;
             max-width: 400px;
             transform: translateY(-20px);
@@ -594,40 +678,46 @@ window.addEventListener('DOMContentLoaded', () => {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .modal-title {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: var(--text-color);
         }
         .modal-close {
             background: transparent;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             cursor: pointer;
             color: var(--text-color);
             opacity: 0.7;
+            line-height: 1;
         }
         .modal-close:hover {
             opacity: 1;
         }
         .modal-body {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: var(--text-color);
+            line-height: 1.5;
         }
         .modal-footer {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 15px;
         }
         .modal-btn {
-            padding: 8px 15px;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
             font-weight: 500;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, transform 0.1s;
+            font-size: 1rem;
+        }
+        .modal-btn:active {
+            transform: scale(0.98);
         }
         .modal-btn-cancel {
             background-color: var(--bg-secondary);
@@ -707,6 +797,69 @@ window.addEventListener('DOMContentLoaded', () => {
             background-color: white;
             border-radius: 2px;
         }
+        
+        /* Kod bloğu stilleri */
+        pre {
+            position: relative;
+        }
+        
+        .copy-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            padding: 5px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .copy-button:hover {
+            opacity: 1;
+        }
+        
+        /* Düşünme animasyonu */
+        .thinking {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            color: var(--text-secondary-color);
+            font-style: italic;
+        }
+        
+        .thinking-dots {
+            display: inline-flex;
+            margin-left: 5px;
+        }
+        
+        .thinking-dots span {
+            width: 5px;
+            height: 5px;
+            margin: 0 2px;
+            background-color: currentColor;
+            border-radius: 50%;
+            animation: thinking 1.4s infinite ease-in-out both;
+        }
+        
+        .thinking-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .thinking-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes thinking {
+            0%, 80%, 100% { 
+                transform: scale(0);
+            } 40% { 
+                transform: scale(1);
+            }
+        }
     `;
     document.head.appendChild(style);
     
@@ -766,16 +919,19 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(sidebarOverlay);
         
         // Menü toggle olayı
-        menuToggle.addEventListener('click', () => {
+        menuToggle.addEventListener('click', function() {
+            console.log('Menü butonuna tıklandı');
             const sidebar = document.querySelector('.sidebar');
             if (sidebar) {
                 sidebar.classList.toggle('active');
                 sidebarOverlay.classList.toggle('active');
+                console.log('Sidebar durumu:', sidebar.classList.contains('active'));
             }
         });
         
         // Overlay tıklama olayı
-        sidebarOverlay.addEventListener('click', () => {
+        sidebarOverlay.addEventListener('click', function() {
+            console.log('Overlay tıklandı');
             const sidebar = document.querySelector('.sidebar');
             if (sidebar) {
                 sidebar.classList.remove('active');
@@ -839,6 +995,40 @@ window.addEventListener('DOMContentLoaded', () => {
         
         observer.observe(chatMessages, { childList: true });
     }
+    
+    // CSS değişkenlerini ayarla
+    document.documentElement.style.setProperty('--primary-color-rgb', '66, 133, 244');
+    
+    // Menü açılma sorununu çözmek için ek kontrol
+    setTimeout(() => {
+        const menuButton = document.querySelector('.menu-toggle');
+        if (menuButton) {
+            // Orijinal olay dinleyicisini kaldır
+            const oldMenuButton = menuButton.cloneNode(true);
+            menuButton.parentNode.replaceChild(oldMenuButton, menuButton);
+            
+            // Yeni olay dinleyicisi ekle
+            oldMenuButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Yeni menü tıklama olayı');
+                
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                
+                if (sidebar && overlay) {
+                    if (sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    } else {
+                        sidebar.classList.add('active');
+                        overlay.classList.add('active');
+                    }
+                    console.log('Sidebar durumu (yeni):', sidebar.classList.contains('active'));
+                }
+            });
+        }
+    }, 1000);
 });
 
 /**
