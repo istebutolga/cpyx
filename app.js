@@ -418,165 +418,209 @@ window.addEventListener('DOMContentLoaded', () => {
                 background-color: var(--bg-color);
             }
             
+            /* Mesaj Görünümü İyileştirmeleri */
             .message {
                 padding: 12px 15px;
-                margin-bottom: 15px;
+                margin: 8px 0;
                 border-radius: 18px;
                 max-width: 85%;
                 line-height: 1.4;
                 position: relative;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                font-size: 15px;
+                clear: both;
+                word-wrap: break-word;
+                white-space: pre-wrap;
             }
-            
+
             .message.user {
-                margin-left: auto;
-                background-color: var(--primary-color);
+                float: right;
+                background-color: #4285f4;
                 color: white;
-                border-bottom-right-radius: 5px;
+                border-bottom-right-radius: 4px;
+                margin-left: 15%;
             }
-            
+
             .message.assistant {
-                margin-right: auto;
-                background-color: var(--bg-secondary);
+                float: left;
+                background-color: var(--bg-secondary, #2a2a2a);
                 color: var(--text-color);
-                border-bottom-left-radius: 5px;
+                border-bottom-left-radius: 4px;
+                margin-right: 15%;
             }
-            
-            .message pre {
-                max-width: 100%;
-                overflow-x: auto;
-                background-color: rgba(0, 0, 0, 0.1);
-                padding: 10px;
-                border-radius: 8px;
-                margin: 10px 0;
-            }
-            
-            .message code {
-                font-family: 'Courier New', monospace;
-                font-size: 0.9em;
-                background-color: rgba(0, 0, 0, 0.1);
-                padding: 2px 4px;
-                border-radius: 4px;
-            }
-            
-            .input-container {
-                padding: 10px 15px;
-                background-color: var(--bg-color);
-                border-top: 1px solid var(--border-color);
+
+            .message-header {
                 display: flex;
                 align-items: center;
-                position: relative;
-                min-height: 60px;
-                max-height: 150px;
-                width: 100%;
-                box-sizing: border-box;
-                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+                margin-bottom: 5px;
+                font-size: 13px;
+                opacity: 0.8;
             }
-            
+
+            .message-header .name {
+                font-weight: 500;
+                margin-right: 8px;
+            }
+
+            .message-header .time {
+                font-size: 12px;
+            }
+
+            .message-content {
+                line-height: 1.5;
+            }
+
+            /* Düşünme Animasyonu İyileştirmesi */
+            .thinking-message {
+                display: flex;
+                align-items: center;
+                padding: 8px 12px;
+                background-color: var(--bg-secondary, #2a2a2a);
+                border-radius: 12px;
+                margin: 8px 0;
+                max-width: 100px;
+                float: left;
+                clear: both;
+            }
+
+            .thinking-dots {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+            }
+
+            .thinking-dots span {
+                width: 6px;
+                height: 6px;
+                background-color: var(--text-color);
+                border-radius: 50%;
+                opacity: 0.6;
+                animation: thinking 1.4s infinite ease-in-out both;
+            }
+
+            .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+            .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+            @keyframes thinking {
+                0%, 80%, 100% { transform: scale(0.4); }
+                40% { transform: scale(1); }
+            }
+
+            /* Mesaj Alanı Temizleme */
+            .chat-messages::after {
+                content: '';
+                display: table;
+                clear: both;
+            }
+
+            /* Kod Bloğu İyileştirmeleri */
+            .message pre {
+                background-color: rgba(0, 0, 0, 0.2);
+                border-radius: 8px;
+                padding: 12px;
+                margin: 8px 0;
+                overflow-x: auto;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .message pre code {
+                background: none;
+                padding: 0;
+                border-radius: 0;
+            }
+
+            .message code {
+                font-family: 'Courier New', monospace;
+                background-color: rgba(0, 0, 0, 0.2);
+                padding: 2px 4px;
+                border-radius: 4px;
+                font-size: 0.9em;
+            }
+
+            /* Giriş Alanı İyileştirmeleri */
+            .input-container {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: var(--bg-color);
+                padding: 12px 15px;
+                border-top: 1px solid var(--border-color);
+                display: flex;
+                align-items: flex-end;
+                gap: 10px;
+                max-height: 150px;
+                transition: all 0.3s ease;
+            }
+
             .message-input {
                 flex: 1;
+                min-height: 44px;
+                max-height: 120px;
                 padding: 12px 15px;
-                border-radius: 20px;
+                border-radius: 22px;
                 border: 1px solid var(--border-color);
                 background-color: var(--bg-secondary);
                 color: var(--text-color);
-                resize: none;
-                max-height: 100px;
-                margin-right: 10px;
-                font-size: 16px;
+                font-size: 15px;
                 line-height: 1.4;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                resize: none;
+                transition: all 0.2s ease;
             }
-            
+
             .message-input:focus {
                 outline: none;
-                border-color: var(--primary-color);
-                box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+                border-color: #4285f4;
+                box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
             }
-            
+
             #sendButton {
-                width: 45px;
-                height: 45px;
+                width: 44px;
+                height: 44px;
                 border-radius: 50%;
-                background-color: var(--primary-color);
+                background-color: #4285f4;
+                border: none;
                 color: white;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: none;
                 cursor: pointer;
-                padding: 0;
+                transition: all 0.2s ease;
                 flex-shrink: 0;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-                transition: transform 0.2s, background-color 0.3s;
+                padding: 0;
+                margin: 0;
             }
-            
+
             #sendButton:active {
                 transform: scale(0.95);
             }
-            
-            .new-chat-btn {
-                margin: 15px;
-                padding: 12px 15px;
-                border-radius: 10px;
-                width: calc(100% - 30px);
-                text-align: center;
-                background-color: var(--primary-color);
-                color: white;
-                font-weight: 500;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                transition: background-color 0.2s;
-            }
-            
-            .new-chat-btn:active {
-                background-color: var(--primary-dark-color, #3a6cf3);
-            }
-            
-            .conversation-list {
-                height: calc(100% - 80px);
+
+            /* Chat Container İyileştirmesi */
+            .chat-container {
+                height: calc(100vh - 120px);
+                padding-bottom: 70px;
                 overflow-y: auto;
+                overflow-x: hidden;
                 -webkit-overflow-scrolling: touch;
-                padding: 5px 0;
             }
-            
-            .conversation-item {
-                padding: 12px 15px;
-                border-radius: 10px;
-                margin: 5px 10px;
-                background-color: var(--bg-secondary);
-                transition: background-color 0.2s;
-                position: relative;
+
+            .chat-messages {
+                padding: 15px;
+                max-width: 100%;
+                margin: 0 auto;
+                box-sizing: border-box;
             }
-            
-            .conversation-item.active {
-                background-color: rgba(var(--primary-color-rgb), 0.1);
-                border-left: 3px solid var(--primary-color);
-            }
-            
-            .conversation-item:active {
-                background-color: var(--bg-hover);
-            }
-            
-            .modal-container {
-                width: 95%;
-                padding: 20px;
-                border-radius: 15px;
-            }
-            
-            /* Dokunmatik cihazlar için iyileştirmeler */
-            button, .conversation-item, .message-input {
-                -webkit-tap-highlight-color: transparent;
-            }
-            
-            /* iPhone X ve üzeri için güvenli alan */
+
+            /* iPhone X ve Üzeri için Güvenli Alan */
             @supports (padding: max(0px)) {
                 .input-container {
-                    padding-bottom: max(15px, env(safe-area-inset-bottom));
+                    padding-bottom: max(12px, env(safe-area-inset-bottom));
                 }
                 
-                .sidebar {
-                    padding-top: env(safe-area-inset-top);
-                    height: calc(100% - env(safe-area-inset-bottom));
+                .chat-container {
+                    padding-bottom: max(70px, calc(70px + env(safe-area-inset-bottom)));
                 }
             }
         }
@@ -1300,195 +1344,33 @@ function updateCurrentConversation() {
  * @returns {string} - Oluşturulan mesaj elementi ID'si
  */
 function appendMessage(role, content, isThinking = false) {
-    // Parametre validasyonu ekle
-    if (typeof content !== 'string') {
-        console.error('Geçersiz mesaj içeriği:', content);
-        content = ''; // Boş string olarak ayarla
-    }
-
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${role}${isThinking ? ' thinking' : ''}`;
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    // Mesaj zamanını ve meta verilerini ekle
-    const timestamp = new Date().toISOString();
-    const messageId = 'msg-' + Date.now();
-    const theme = identifyMainTheme(chatHistory);
-    
-    // AI adını güncelle
-    if (role === 'assistant') {
-        content = content || ''; // content undefined ise boş string
-        if (!content.startsWith('# ' + AI_NAME)) {
-            content = `# ${AI_NAME}\n\n${content}`;
-        }
-    }
-    
-    // Mesaj başlığını oluştur
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'message-header';
-    headerDiv.innerHTML = `
-        <span class="message-role">${role === 'assistant' ? AI_NAME : 'Sen'}</span>
-        <span class="message-time">${new Date(timestamp).toLocaleTimeString()}</span>
-        ${theme ? `<span class="message-theme">${theme}</span>` : ''}
-    `;
-    messageDiv.appendChild(headerDiv);
-    
-    if (content.includes('<think>')) {
-        // Düşünme içeriğini işle
-        const thinkingContent = content.match(/<think>([\s\S]*?)<\/think>/);
-        const mainContent = content.replace(/<think>[\s\S]*?<\/think>\n?\n?/g, '');
-        
-        if (thinkingContent && thinkingContent[1]) {
-            // Düşünme içeriğini göster
-            const thinkingDiv = document.createElement('div');
-            thinkingDiv.className = 'thinking-process';
-            thinkingDiv.innerHTML = `<em class="thinking-text">${thinkingContent[1]}</em>`;
-            
-            // Düşünme içeriğini gizle/göster butonu
-            const toggleButton = document.createElement('button');
-            toggleButton.className = 'toggle-thinking-btn';
-            toggleButton.textContent = 'Düşünme sürecini göster';
-            toggleButton.addEventListener('click', function() {
-                const isVisible = thinkingDiv.style.display !== 'none';
-                thinkingDiv.style.display = isVisible ? 'none' : 'block';
-                this.textContent = isVisible ? 'Düşünme sürecini göster' : 'Düşünme sürecini gizle';
-            });
-            
-            // Düşünme içeriğini varsayılan olarak gizle
-            thinkingDiv.style.display = 'none';
-            
-            // Ana içeriği işle
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            
-            if (role === 'assistant') {
-                // Markdown'ı HTML'e çevir ve güvenli şekilde işle
-                try {
-                    // Markdown içeriğini düzenle
-                    let processedContent = preprocessMarkdown(mainContent);
-                    
-                    // Markdown'ı HTML'e çevir
-                    const rawHtml = marked.parse(processedContent);
-                    
-                    // DOMPurify ile XSS koruması uygula
-                    const cleanHtml = DOMPurify.sanitize(rawHtml, {
-                        ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'ul', 'ol', 'li', 'code', 'pre', 'strong', 'em', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'br'],
-                        ALLOWED_ATTR: ['href', 'class', 'id', 'target']
-                    });
-                    
-                    contentDiv.innerHTML = cleanHtml;
-                    
-                    // Markdown elementlerini işle
-                    processMarkdownElements(contentDiv);
-                    
-                } catch (error) {
-                    console.error('Markdown işleme hatası:', error);
-                    contentDiv.textContent = mainContent;
-                }
-            } else {
-                contentDiv.textContent = mainContent;
-            }
-            
-            // Elementleri mesaj div'ine ekle
-            messageDiv.appendChild(toggleButton);
-            messageDiv.appendChild(thinkingDiv);
-            messageDiv.appendChild(contentDiv);
-        } else {
-            // Düşünme içeriği yoksa normal işle
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.innerHTML = content.replace(/<think>(.*?)<\/think>/g, '<em class="thinking-text">$1</em>');
-            messageDiv.appendChild(contentDiv);
-        }
-    } else if (role === 'assistant' && !isThinking) {
-        // Markdown'ı HTML'e çevir
-        try {
-            // Markdown içeriğini düzenle
-            let processedContent = preprocessMarkdown(content);
-            
-            // Markdown'ı HTML'e çevir
-            const rawHtml = marked.parse(processedContent);
-            
-            // XSS koruması için DOMPurify kullan
-            const cleanHtml = DOMPurify.sanitize(rawHtml);
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.innerHTML = cleanHtml;
-            
-            // Markdown elementlerini işle
-            processMarkdownElements(contentDiv);
-            
-            messageDiv.appendChild(contentDiv);
-        } catch (error) {
-            console.error('Markdown işleme hatası:', error);
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = content;
-            messageDiv.appendChild(contentDiv);
-        }
+    if (isThinking) {
+        messageDiv.className = 'thinking-message';
+        messageDiv.innerHTML = `
+            <div class="thinking-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        `;
     } else {
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        contentDiv.textContent = content;
-        messageDiv.appendChild(contentDiv);
+        messageDiv.className = `message ${role}`;
+        messageDiv.innerHTML = `
+            <div class="message-header">
+                <span class="name">${role === 'user' ? 'Sen' : 'CepyX'}</span>
+                <span class="time">${timestamp}</span>
+            </div>
+            <div class="message-content">${content}</div>
+        `;
     }
-    
-    // Meta verileri ekle
-    messageDiv.dataset.id = messageId;
-    messageDiv.dataset.timestamp = timestamp;
-    messageDiv.dataset.theme = theme;
     
     chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
     
-    // Otomatik scroll (yumuşak geçiş ile)
-    chatMessages.scrollTo({
-        top: chatMessages.scrollHeight,
-        behavior: 'smooth'
-    });
-    
-    // Mobil cihazlarda yeni mesaj geldiğinde sayfayı aşağı kaydır
-    if (window.innerWidth <= 768) {
-        window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: 'smooth'
-        });
-    }
-    
-    // Mesajı geçmişe ekle
-    if (!isThinking) {
-        const messageObj = {
-            id: messageId,
-            role,
-            content,
-            timestamp,
-            theme
-        };
-        
-        chatHistory.push(messageObj);
-        
-        // Geçmiş sınırını kontrol et ve en eski mesajları kaldır
-        if (chatHistory.length > MAX_HISTORY_LENGTH) {
-            // Önemli bağlamı korumak için ilk mesajı tut
-            const firstMessage = chatHistory[0];
-            chatHistory = [firstMessage, ...chatHistory.slice(-(MAX_HISTORY_LENGTH - 1))];
-        }
-        
-        // Mevcut konuşmayı güncelle
-        updateCurrentConversation();
-        
-        // Konuşma temasını güncelle
-        if (role === 'user') {
-            document.dispatchEvent(new CustomEvent('themeUpdate', { 
-                detail: { 
-                    theme,
-                    messageId,
-                    timestamp 
-                }
-            }));
-        }
-    }
-    
-    return messageId;
+    return messageDiv.id;
 }
 
 /**
